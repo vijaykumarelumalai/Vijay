@@ -1,0 +1,132 @@
+Here is the continuation of the Thymeleaf template `index.html` and the remaining code:
+
+### Step 7: Create Thymeleaf Template (Continued)
+
+```html
+<h3>Comments</h3>
+        <div th:each="comment : ${post.comments}">
+            <p th:text="${comment.content}"></p>
+        </div>
+        <form th:action="@{/comment}" method="post">
+            <textarea name="content"></textarea>
+            <input type="hidden" name="postId" th:value="${post.id}" />
+            <button type="submit">Comment</button>
+        </form>
+    </div>
+
+    <h2>Create a new post</h2>
+    <form th:action="@{/post}" method="post">
+        <textarea name="content"></textarea>
+        <button type="submit">Post</button>
+    </form>
+</body>
+</html>
+```
+
+### Explanation of the Thymeleaf Template
+
+- **Posts Loop**: The `th:each="post : ${posts}"` iterates through all posts, displaying the content and the number of likes.
+- **Like Button**: A form submits a `POST` request to the `/like` endpoint to like a post.
+- **Comments Loop**: Each post's comments are displayed in a nested loop, `th:each="comment : ${post.comments}"`.
+- **Comment Form**: A form for submitting a new comment under a post.
+- **Create Post**: A simple form to create a new post.
+
+### Step 8: Add `PostController.java` Methods
+
+Modify the `PostController.java` to include logic for handling the liking of posts, creating comments, and creating new posts.
+
+```java
+@PostMapping("/post")
+public String createPost(@ModelAttribute Post post, Principal principal) {
+    User user = userService.findByUsername(principal.getName()).orElseThrow();
+    post.setUser(user);
+    postService.save(post);
+    return "redirect:/";
+}
+
+@PostMapping("/comment")
+public String createComment(@ModelAttribute Comment comment, @RequestParam Long postId, Principal principal) {
+    User user = userService.findByUsername(principal.getName()).orElseThrow();
+    Post post = postService.getById(postId).orElseThrow();
+    comment.setUser(user);
+    comment.setPost(post);
+    commentService.save(comment);
+    return "redirect:/";
+}
+
+@PostMapping("/like")
+public String likePost(@RequestParam Long postId) {
+    Post post = postService.getById(postId).orElseThrow();
+    post.setLikes(post.getLikes() + 1);
+    postService.save(post);
+    return "redirect:/";
+}
+```
+
+### Explanation of the Methods
+
+- **`createPost`**: Handles creating a new post. It retrieves the logged-in user using `Principal` and saves the post associated with that user.
+- **`createComment`**: Handles creating a comment on a specific post. It retrieves the post by its ID and associates the comment with both the user and the post.
+- **`likePost`**: Handles liking a post. It retrieves the post by its ID, increments the like count, and saves the updated post.
+
+### Step 9: Service Layer Enhancements
+
+To ensure the service layer can retrieve a specific post by its ID, add the following method in `PostService.java`:
+
+```java
+public Optional<Post> getById(Long id) {
+    return postRepository.findById(id);
+}
+```
+
+This method will allow you to retrieve a post by its ID in the controller layer.
+
+### Step 10: Security Configuration (Optional)
+
+If you want to secure your application, you can add Spring Security for user authentication. You can include login and registration features, ensuring only authenticated users can post, comment, or like.
+
+### Step 11: Running the Application
+
+- Ensure your MySQL database is running and configured correctly in `application.properties`.
+- Run the application from Eclipse by right-clicking the project and selecting `Run As > Spring Boot App`.
+- Open a web browser and go to `http://localhost:8080/` to interact with your social media platform.
+
+### Step 12: Testing
+
+- Create users, posts, and comments to ensure everything works.
+- Test the like functionality and ensure the counts update properly.
+- Check that the data is being stored correctly in your MySQL database.
+
+### Final Directory Structure
+
+```plaintext
+/src/main/java/com/example/socialmedia
+│
+├── SocialMediaApplication.java       # Main application class
+│
+├── controller
+│   └── PostController.java           # Controller for handling posts
+│
+├── model
+│   └── Post.java                     # Model for Post entity
+│   └── User.java                     # Model for User entity
+│   └── Comment.java                  # Model for Comment entity
+│
+├── repository
+│   └── PostRepository.java           # Repository for Post entity
+│   └── UserRepository.java           # Repository for User entity
+│   └── CommentRepository.java        # Repository for Comment entity
+│
+├── service
+│   └── PostService.java              # Business logic for Post
+│   └── UserService.java              # Business logic for User
+│   └── CommentService.java           # Business logic for Comment
+│
+└── resources
+    ├── static                        # Static assets (CSS, JS, images)
+    ├── templates                     # Thymeleaf templates for views
+        └── index.html                # Main template for the homepage
+    └── application.properties        # Database configurations
+```
+
+With these steps, your Spring Boot project for a social media platform is ready. You can now expand and customize it as needed. Let me know if you need further assistance!
