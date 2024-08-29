@@ -1,0 +1,231 @@
+Here's a step-by-step guide with the code to create a Spring Boot project named "Login."
+
+### **1. Project Structure:**
+The project structure will look like this:
+
+```
+login
+│
+├── src
+│   ├── main
+│   │   ├── java
+│   │   │   └── com.example.login
+│   │   │       ├── LoginApplication.java
+│   │   │       ├── controller
+│   │   │       │   └── LoginController.java
+│   │   │       ├── service
+│   │   │       │   └── LoginService.java
+│   │   │       └── repository
+│   │   │           └── UserRepository.java
+│   │   └── resources
+│   │       ├── application.properties
+│   │       └── templates
+│   │           └── login.html
+│   └── test
+│       └── java
+│           └── com.example.login
+│               └── LoginApplicationTests.java
+│
+├── pom.xml
+└── build.gradle
+```
+
+### **2. pom.xml (For Maven Projects):**
+Add the following dependencies in your `pom.xml`:
+
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>login</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>Login</name>
+    <description>Spring Boot Login Project</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.0.0</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <dependencies>
+        <!-- Spring Boot Starter Web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Starter Thymeleaf -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Starter Data JPA -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- H2 Database (in-memory) -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Spring Boot Starter Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+```
+
+### **3. Main Application Class (LoginApplication.java):**
+This is the entry point for your Spring Boot application.
+
+```java
+package com.example.login;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class LoginApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(LoginApplication.class, args);
+    }
+}
+```
+
+### **4. Controller (LoginController.java):**
+This handles HTTP requests related to login.
+
+```java
+package com.example.login.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+
+@Controller
+public class LoginController {
+
+    @GetMapping("/login")
+    public String showLoginForm() {
+        return "login";  // This will render login.html
+    }
+
+    @PostMapping("/login")
+    public String processLogin(String username, String password, Model model) {
+        // Dummy login logic (for demo purposes)
+        if ("admin".equals(username) && "password".equals(password)) {
+            model.addAttribute("message", "Login successful!");
+            return "welcome";  // This should render a welcome page
+        } else {
+            model.addAttribute("error", "Invalid username or password.");
+            return "login";  // Re-render login.html with error message
+        }
+    }
+}
+```
+
+### **5. Service Layer (LoginService.java) [Optional]:**
+You can include a service layer for handling business logic, but for simplicity, I’ll keep it inside the controller.
+
+### **6. Repository (UserRepository.java) [Optional]:**
+If you're using a database, you can create a repository to handle data operations.
+
+```java
+package com.example.login.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.example.login.model.User;
+
+public interface UserRepository extends JpaRepository<User, Long> {
+    User findByUsername(String username);
+}
+```
+
+### **7. Template (login.html):**
+Create a simple login page in `src/main/resources/templates/login.html`.
+
+```html
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+    
+    <form action="#" th:action="@{/login}" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username"><br><br>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password"><br><br>
+        
+        <button type="submit">Login</button>
+    </form>
+
+    <div th:if="${error}" style="color:red;">
+        <p th:text="${error}"></p>
+    </div>
+    
+    <div th:if="${message}" style="color:green;">
+        <p th:text="${message}"></p>
+    </div>
+</body>
+</html>
+```
+
+### **8. application.properties:**
+You can configure your application settings in `src/main/resources/application.properties`.
+
+```properties
+# Server port (optional)
+server.port=8080
+
+# H2 database configuration (optional)
+spring.h2.console.enabled=true
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=password
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+```
+
+### **9. Running the Application:**
+Once everything is set up, you can run the application using:
+
+- From your IDE: Run the `LoginApplication.java` file.
+- From the command line:
+  ```bash
+  mvn spring-boot:run
+  ```
+
+### **10. Accessing the Application:**
+Open your browser and navigate to `http://localhost:8080/login` to access the login page.
+
+---
+
+This setup should get you started with a simple Spring Boot project named "Login". You can expand upon this by adding more features, security, database integration, etc., as per your needs!
