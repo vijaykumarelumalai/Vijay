@@ -1,0 +1,293 @@
+To complete the project, I'll provide you with the essential HTML pages for the social media platform. These pages will include:
+
+1. **Home Page (Feed)**
+2. **User Profile Page**
+3. **Login Page**
+4. **Registration Page**
+5. **Post Details Page**
+
+Here’s the basic structure for each page.
+
+### 1. **Home Page (feed.html)**
+This page displays the feed with posts from all users.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Social Media</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Social Media Platform</h1>
+        <nav>
+            <a href="/profile">Profile</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Feed</h2>
+        <div class="posts">
+            <!-- Loop through posts and display them -->
+            <div th:each="post : ${posts}">
+                <div class="post">
+                    <h3 th:text="${post.title}">Post Title</h3>
+                    <p th:text="${post.content}">Post content...</p>
+                    <p><strong>By:</strong> <span th:text="${post.user.username}">User</span></p>
+                    <a th:href="@{/post/{id}(id=${post.id})}">View Details</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+```
+
+### 2. **User Profile Page (profile.html)**
+This page displays the user’s profile information and their posts.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Social Media</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Profile</h1>
+        <nav>
+            <a href="/feed">Home</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>User Profile</h2>
+        <p><strong>Username:</strong> <span th:text="${user.username}">Username</span></p>
+        <p><strong>Email:</strong> <span th:text="${user.email}">user@example.com</span></p>
+
+        <h3>Your Posts</h3>
+        <div class="posts">
+            <div th:each="post : ${user.posts}">
+                <div class="post">
+                    <h3 th:text="${post.title}">Post Title</h3>
+                    <p th:text="${post.content}">Post content...</p>
+                    <a th:href="@{/post/{id}(id=${post.id})}">View Details</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+```
+
+### 3. **Login Page (login.html)**
+This page allows users to log in to their accounts.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Social Media</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Login</h1>
+    </header>
+
+    <main>
+        <form action="/login" method="post">
+            <div>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="/register">Register here</a></p>
+    </main>
+</body>
+</html>
+```
+
+### 4. **Registration Page (register.html)**
+This page allows users to create a new account.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Social Media</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Register</h1>
+    </header>
+
+    <main>
+        <form action="/register" method="post">
+            <div>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Register</button>
+        </form>
+        <p>Already have an account? <a href="/login">Login here</a></p>
+    </main>
+</body>
+</html>
+```
+
+### 5. **Post Details Page (postDetails.html)**
+This page shows the details of a specific post along with the comments.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Details - Social Media</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Post Details</h1>
+        <nav>
+            <a href="/feed">Home</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2 th:text="${post.title}">Post Title</h2>
+        <p th:text="${post.content}">Post content...</p>
+        <p><strong>By:</strong> <span th:text="${post.user.username}">Username</span></p>
+
+        <h3>Comments</h3>
+        <div class="comments">
+            <div th:each="comment : ${post.comments}">
+                <p th:text="${comment.content}">Comment content...</p>
+                <p><strong>By:</strong> <span th:text="${comment.user.username}">Username</span></p>
+            </div>
+        </div>
+
+        <h3>Add a Comment</h3>
+        <form action="/comment" method="post">
+            <input type="hidden" name="postId" th:value="${post.id}">
+            <div>
+                <textarea name="content" placeholder="Write your comment here..." required></textarea>
+            </div>
+            <button type="submit">Comment</button>
+        </form>
+    </main>
+</body>
+</html>
+```
+
+### 6. **CSS Styles (styles.css)**
+Here's a simple CSS file that you can use for basic styling. You can place this in the `src/main/resources/static/css/` directory.
+
+```css
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+}
+
+header h1 {
+    margin: 0;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 15px;
+}
+
+main {
+    padding: 20px;
+}
+
+h2 {
+    color: #333;
+}
+
+form {
+    margin-top: 20px;
+}
+
+form div {
+    margin-bottom: 15px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #555;
+}
+
+.posts, .comments {
+    margin-top: 20px;
+}
+
+.post, .comment {
+    padding: 15px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+```
+
+### Directory Structure:
+- `src/main/resources/templates/`
+  - `feed.html`
+  - `profile.html`
+  - `login.html`
+  - `register.html`
+  - `postDetails.html`
+- `src/main/resources/static/css/`
+  - `styles.css`
+
+These templates and styles should help you build the core frontend for your social media platform. You can further customize and expand them as needed.
