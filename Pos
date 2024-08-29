@@ -1,0 +1,389 @@
+package com.example.socialmedia.controller;
+
+import com.example.socialmedia.model.Comment;
+import com.example.socialmedia.model.Post;
+import com.example.socialmedia.model.User;
+import com.example.socialmedia.service.CommentService;
+import com.example.socialmedia.service.PostService;
+import com.example.socialmedia.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import java.security.Principal;
+
+@Controller
+public class PostController {
+    @Autowired
+    private PostService postService;
+
+    @Autowired
+    private CommentService commentService;
+
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("/feed")
+    public String getFeed(Model model, Principal principal) {
+        model.addAttribute("posts", postService.findAll());
+        return "feed";
+    }
+
+    @GetMapping("/profile")
+    public String getProfile(Model model, Principal principal) {
+        User user = userService.findByUsername(principal.getName()).orElseThrow(null);
+        model.addAttribute("user", user);
+        model.addAttribute("posts", postService.findByUser(user));
+        return "profile";
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    @GetMapping("/register")
+    public String register() {
+        return "register";
+    }
+
+    @GetMapping("/post/{id}")
+    public String getPostDetails(@PathVariable Long id, Model model) {
+        Post post = postService.getById(id).orElseThrow(null);
+        model.addAttribute("post", post);
+        return "postDetails";
+    }
+
+    @PostMapping("/post")
+    public String createPost(@ModelAttribute Post post, Principal principal) {
+        User user = userService.findByUsername(principal.getName()).orElseThrow(null);
+        post.setUser(user);
+        postService.save(post);
+        return "redirect:/feed";
+    }
+
+    @PostMapping("/comment")
+    public String createComment(@ModelAttribute Comment comment, @RequestParam Long postId, Principal principal) {
+        User user = userService.findByUsername(principal.getName()).orElseThrow(null);
+        Post post = postService.getById(postId).orElseThrow(null);
+        comment.setUser(user);
+        comment.setPost(post);
+        commentService.save(comment);
+        return "redirect:/post/" + postId;
+    }
+
+    @PostMapping("/like")
+    public String likePost(@RequestParam Long postId) {
+        Post post = postService.getById(postId).orElseThrow(null);
+        post.setLikes(post.getLikes() + 1);
+        postService.save(post);
+        return "redirect:/feed";
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+post service 
+
+
+
+
+
+
+
+package com.example.socialmedia.service;
+
+import com.example.socialmedia.model.Post;
+import com.example.socialmedia.repository.PostRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class PostService {
+    @Autowired
+    private PostRepository postRepository;
+
+    public List<Post> findAll() {
+        return postRepository.findAll();
+    }
+
+    public List<Post> findByUser(User user) {
+        return postRepository.findByUser(user);
+    }
+
+    public Optional<Post> getById(Long id) {
+        return postRepository.findById(id);
+    }
+
+    public void save(Post post) {
+        postRepository.save(post);
+    }
+}
+
+
+
+
+
+
+command service 
+
+
+package com.example.socialmedia.service;
+
+import com.example.socialmedia.model.Comment;
+import com.example.socialmedia.repository.CommentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CommentService {
+    @Autowired
+    private CommentRepository commentRepository;
+
+    public void save(Comment comment) {
+        commentRepository.save(comment);
+    }
+}
+
+
+
+
+
+user service 
+
+
+package com.example.socialmedia.service;
+
+import com.example.socialmedia.model.User;
+import com.example.socialmedia.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class UserService {
+    @Autowired
+    private UserRepository userRepository;
+
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+}
+
+
+
+
+
+
+
+
+To integrate the HTML templates with your `PostController` class and ensure that the services work correctly, you need to make several updates to the controller and, potentially, the service classes. Here's how you can align your `PostController` with the HTML files:
+
+### Updated `PostController` Class
+
+1. **Add Methods to Handle Page Requests**
+2. **Ensure Proper Handling of Comments and Posts**
+
+Here is the updated `PostController` class:
+
+```java
+package com.example.socialmedia.controller;
+
+import com.example.socialmedia.model.Comment;
+import com.example.socialmedia.model.Post;
+import com.example.socialmedia.model.User;
+import com.example.socialmedia.service.CommentService;
+import com.example.socialmedia.service.PostService;
+import com.example.socialmedia.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import java.security.Principal;
+
+@Controller
+public class PostController {
+    @Autowired
+    private PostService postService;
+
+    @Autowired
+    private CommentService commentService;
+
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("/feed")
+    public String getFeed(Model model, Principal principal) {
+        model.addAttribute("posts", postService.findAll());
+        return "feed";
+    }
+
+    @GetMapping("/profile")
+    public String getProfile(Model model, Principal principal) {
+        User user = userService.findByUsername(principal.getName()).orElseThrow(null);
+        model.addAttribute("user", user);
+        model.addAttribute("posts", postService.findByUser(user));
+        return "profile";
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    @GetMapping("/register")
+    public String register() {
+        return "register";
+    }
+
+    @GetMapping("/post/{id}")
+    public String getPostDetails(@PathVariable Long id, Model model) {
+        Post post = postService.getById(id).orElseThrow(null);
+        model.addAttribute("post", post);
+        return "postDetails";
+    }
+
+    @PostMapping("/post")
+    public String createPost(@ModelAttribute Post post, Principal principal) {
+        User user = userService.findByUsername(principal.getName()).orElseThrow(null);
+        post.setUser(user);
+        postService.save(post);
+        return "redirect:/feed";
+    }
+
+    @PostMapping("/comment")
+    public String createComment(@ModelAttribute Comment comment, @RequestParam Long postId, Principal principal) {
+        User user = userService.findByUsername(principal.getName()).orElseThrow(null);
+        Post post = postService.getById(postId).orElseThrow(null);
+        comment.setUser(user);
+        comment.setPost(post);
+        commentService.save(comment);
+        return "redirect:/post/" + postId;
+    }
+
+    @PostMapping("/like")
+    public String likePost(@RequestParam Long postId) {
+        Post post = postService.getById(postId).orElseThrow(null);
+        post.setLikes(post.getLikes() + 1);
+        postService.save(post);
+        return "redirect:/feed";
+    }
+}
+```
+
+### Potential Changes to the Service Classes
+
+#### `PostService`
+Ensure that `PostService` has the following methods:
+
+- `findAll()`: Retrieves all posts.
+- `findByUser(User user)`: Retrieves posts by a specific user.
+- `getById(Long id)`: Retrieves a post by its ID.
+- `save(Post post)`: Saves or updates a post.
+
+#### `CommentService`
+Ensure that `CommentService` has:
+
+- `save(Comment comment)`: Saves or updates a comment.
+
+#### `UserService`
+Ensure that `UserService` has:
+
+- `findByUsername(String username)`: Retrieves a user by username.
+
+### Example Service Class Updates
+
+#### `PostService`
+
+```java
+package com.example.socialmedia.service;
+
+import com.example.socialmedia.model.Post;
+import com.example.socialmedia.repository.PostRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class PostService {
+    @Autowired
+    private PostRepository postRepository;
+
+    public List<Post> findAll() {
+        return postRepository.findAll();
+    }
+
+    public List<Post> findByUser(User user) {
+        return postRepository.findByUser(user);
+    }
+
+    public Optional<Post> getById(Long id) {
+        return postRepository.findById(id);
+    }
+
+    public void save(Post post) {
+        postRepository.save(post);
+    }
+}
+```
+
+#### `CommentService`
+
+```java
+package com.example.socialmedia.service;
+
+import com.example.socialmedia.model.Comment;
+import com.example.socialmedia.repository.CommentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CommentService {
+    @Autowired
+    private CommentRepository commentRepository;
+
+    public void save(Comment comment) {
+        commentRepository.save(comment);
+    }
+}
+```
+
+#### `UserService`
+
+```java
+package com.example.socialmedia.service;
+
+import com.example.socialmedia.model.User;
+import com.example.socialmedia.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class UserService {
+    @Autowired
+    private UserRepository userRepository;
+
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+}
+```
+
+Ensure that you have appropriate methods in your repository interfaces (e.g., `PostRepository`, `CommentRepository`, `UserRepository`) to support these operations.
