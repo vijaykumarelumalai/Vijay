@@ -1,0 +1,32 @@
+	<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard-style.css}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h1>Welcome, <span th:text="${student.username}">Student</span>!</h1>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit">Logout</button>
+            </form>
+        </header>
+        <main>
+            <section class="profile-info">
+                <h2>Profile Information</h2>
+                <p><strong>Username:</strong> <span th:text="${student.username}"></span></p>
+                <p><strong>Email:</strong> <span th:text="${student.email}"></span></p>
+            </section>
+            <section class="courses">
+                <h2>My Courses</h2>
+                <ul id="course-list">
+                    <!-- Courses will be populated dynamically -->
+                </ul>
+            </section>
+        </main>
+    </div>
+    <script th:src="@{/js/dashboard-script.js}"></script>
+</body>
+</html>
